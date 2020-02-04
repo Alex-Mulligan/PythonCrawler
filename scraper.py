@@ -3,17 +3,19 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 
 def scraper(url, resp):
-    links = extract_next_links(url, resp)
-    return [link for link in links if is_valid(link)]
+    if resp.status in {200,201,202,203,206}:
+        links = extract_next_links(url, resp)
+        return [link for link in links if is_valid(link)]
 
 def extract_next_links(url, resp):
     # Implementation requred...
-    page = requests.get(url)
-    soup = BeautifulSoup(page.content)
+#     page = requests.get(url)
+#     soup = BeautifulSoup(page.content)
+    soup = BeautifulSoup(resp.raw_response.content)
     links = []
     for link in soup.findAll('a', attrs={'href':re.compile(r"^https?://")}):
         links.append(link.get('href'))
-    return list()
+    return links
 
 def extract_text(soup):
     blacklist = ['[document]','noscript','header','html','meta','head','input','script']
