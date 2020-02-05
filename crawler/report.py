@@ -16,7 +16,7 @@ class Report(object):
             self.unique_pages += 1
             page_length = len(tokens)
             if page_length > self.longest_page:
-                self.longest_page = (url, page_length)
+                self.longest_page[1] = (url, page_length)
             for word in tokens:
                 self.words[word] += 1
             parsed = urlparse(url)

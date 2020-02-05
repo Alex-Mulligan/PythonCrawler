@@ -19,7 +19,7 @@ def extract_next_links(url, resp):
     # Implementation requred...
 #     page = requests.get(url)
 #     soup = BeautifulSoup(page.content)
-    soup = BeautifulSoup(resp.raw_response.content)
+    soup = BeautifulSoup(resp.raw_response.content, features="lxml")
     links = []
     for link in soup.findAll('a', attrs={'href':re.compile(r"^https?://")}):
         links.append(urldefrag(link.get('href'))[0])
