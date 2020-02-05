@@ -1,11 +1,19 @@
 import re, requests
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urldefrag
 from bs4 import BeautifulSoup
 
 def scraper(url, resp):
-    if resp.status in {200,201,202,203,206}:
-        links = extract_next_links(url, resp)
-        return [link for link in links if is_valid(link)]
+    if resp.status in range(200,400):
+        links, tokens = extract_next_links(url, resp)
+        return ([link for link in links if is_valid(link)], tokens)
+    elif resp.status in range(400,600):
+        print(f"{url} gave status {resp.status}")
+        return (list(), list())
+    elif resp.status in range(600,607):
+        print(f"{url} gave status {resp.status} with message: {resp.error}")
+        return (list(),list())
+    else:
+        return (list(), list())
 
 def extract_next_links(url, resp):
     # Implementation requred...
@@ -14,7 +22,8 @@ def extract_next_links(url, resp):
     soup = BeautifulSoup(resp.raw_response.content)
     links = []
     for link in soup.findAll('a', attrs={'href':re.compile(r"^https?://")}):
-        links.append(link.get('href'))
+        links.append(urldefrag(link.get('href'))[0])
+    tokens = extract_text(soup)
     return links
 
 def extract_text(soup):
@@ -30,22 +39,14 @@ def extract_text(soup):
     regex = re.compile(r"[A-Za-z0-9]+")
     for line in page_list:
         tokens.extend(re.findall(line.lower()))
-    return page_text #or tokens for a list of tokens
+    return tokens #or page_text for a large string representation of the page
 
 def is_valid(url):
     try:
         parsed = urlparse(url)
         if parsed.scheme not in set(["http", "https"]):
             return False
-        pattern = re.compile(r".*(ics|cs|stat|informatics)\.uci\.edu$")
-        patternTodayNetloc = re.compile(r"^today\.uci\.edu$")
-        patternTodayPath = re.compile(r"^department/information_computer_sciences/.*")
-        if patternTodayNetloc.match(parsed.netloc):
-            if not patternTodayPath.match(parsed.path):
-                return False
-        else:
-            if not pattern.match(parsed.netloc):
-                return False
+        check_robots_txt(parsed)
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
@@ -59,3 +60,55 @@ def is_valid(url):
     except TypeError:
         print ("TypeError for ", parsed)
         raise
+
+def check_robots_txt(parsed):
+    try:
+        if re.match(r".*ics\.uci\.edu", parsed.netloc):
+            if re.match(r"^/bin/?", parsed.path) or re.match(r"^/~mpufal/?"):
+                return False
+            return True
+        elif re.match(r".*cs\.uci\.edu", parsed.netloc):
+            if re.match(r"/wp-admin/?", parsed.path):
+                if not re.match(r"/wp-admin/admin-ajax.php"):
+                    return False
+            return True
+        elif re.match(r".*stat\.uci\.edu", parsed.netloc):
+            if re.match(r"/wp-admin/?", parsed.path):
+                if not re.match(r"/wp-admin/admin-ajax.php"):
+                    return False
+            return True
+        elif re.match(r".*informatics\.uci\.edu", parsed.netloc):
+            if re.match(r"/wp-admin/?", parsed.path):
+                if not re.match(r"/wp-admin/admin-ajax.php"):
+                    return False
+            elif re.match(r"/research/?", parsed.path):
+                if not (re.match(r"/research/lab-centers/?", parsed.path) or 
+                        re.match(r"/research/areas-of-expertise/?", parsed.path) or 
+                        re.match(r"/research/example-research-projects/?", parsed.path) or 
+                        re.match(r"/research/phd-research/?", parsed.path) or 
+                        re.match(r"/research/past-dissertations/?", parsed.path) or 
+                        re.match(r"/research/masters-research/?", parsed.path) or 
+                        re.match(r"/research/undergraduate-research/?", parsed.path) or 
+                        re.match(r"/research/gifts-grants/?", parsed.path)):
+                    return False
+            return True
+        elif re.match(r"^(www\.)?today\.uci\.edu", parsed.netloc) and re.match(r"^department/information_computer_sciences/.*", parsed.path):
+            if re.match(r".*/calendar/.*\?.*types.*", parsed.path):
+                return False
+            elif re.match(r".*/browse.*\?.*types.*", parsed.path):
+                return False
+            elif re.match(r".*/calendar/week/?", parsed.path):
+                return False
+            elif re.match(r".*/calendar/20[0-2]\d.*", parsed.path):
+                return False
+            elif re.match(r".*/search/?", parsed.path):
+                if not (re.match(r".*/search/events\.ics/?", parsed.path) or re.match(r".*/search/events.xml/?", parsed.path)):
+                    return False
+            return True
+        else:
+            return False
+    except:
+        print(f"Error for {parsed}")
+        raise
+    
+    
