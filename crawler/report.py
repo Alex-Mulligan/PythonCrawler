@@ -37,7 +37,7 @@ class Report(object):
                               'down','during','e','each','f','few','for','from','further','h','had','hadn','has',
                               'hasn','have','haven','having','he','her','here','hers','herself','him','himself',
                               'his','how','i','if','in','into','is','isn','it','its','itself','l','ll','let',
-                              'm','me','more','most','must','mustn','my','myself','n','no','nor','not','o','of'
+                              'm','me','more','most','must','mustn','my','myself','n','no','nor','not','o','of',
                               'off','on','once','only','or','other','ought','our','ours','ourselves','out','over',
                               'own','s','same','she','should','shouldn','so','some','such','t','than','that','the',
                               'their','theirs','them','themselves','then','there','these','they','this','those',
