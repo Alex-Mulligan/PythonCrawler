@@ -64,12 +64,12 @@ def is_valid(url):
 def check_robots_txt(parsed):
     try:
         if re.match(r".*ics\.uci\.edu", parsed.netloc):
-            if re.match(r"^/bin/?", parsed.path) or re.match(r"^/~mpufal/?"):
+            if re.match(r"^/bin/?", parsed.path) or re.match(r"^/~mpufal/?", parsed.path):
                 return False
             return True
         elif re.match(r".*cs\.uci\.edu", parsed.netloc):
             if re.match(r"/wp-admin/?", parsed.path):
-                if not re.match(r"/wp-admin/admin-ajax.php"):
+                if not re.match(r"/wp-admin/admin-ajax.php", parsed.path):
                     return False
             return True
         elif re.match(r".*stat\.uci\.edu", parsed.netloc):
@@ -79,7 +79,7 @@ def check_robots_txt(parsed):
             return True
         elif re.match(r".*informatics\.uci\.edu", parsed.netloc):
             if re.match(r"/wp-admin/?", parsed.path):
-                if not re.match(r"/wp-admin/admin-ajax.php"):
+                if not re.match(r"/wp-admin/admin-ajax.php", parsed.path):
                     return False
             elif re.match(r"/research/?", parsed.path):
                 if not (re.match(r"/research/lab-centers/?", parsed.path) or 
