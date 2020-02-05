@@ -24,7 +24,7 @@ def extract_next_links(url, resp):
     for link in soup.findAll('a', attrs={'href':re.compile(r"^https?://")}):
         links.append(urldefrag(link.get('href'))[0])
     tokens = extract_text(soup)
-    return links
+    return (links, tokens)
 
 def extract_text(soup):
     blacklist = ['[document]','noscript','header','html','meta','head','input','script']
