@@ -27,10 +27,23 @@ class Report(object):
 
     def print_report(self):
         with self.lock:
-            with open("report.txt") as file:
+            with open("report.txt", "w+") as file:
                 file.write(f"1. Number of unique pages found: {self.unique_pages}.\n")
                 file.write(f"2. The longest page was: {self.longest_page[0]}, with {self.longest_page[1]} words.\n")
                 file.write(f"3. The 50 most common words (excluding stop words) were:\n")
+                stop_words = set({'a','about','above','after','again','against','all','am','an','and','any','are',
+                              'as','at','b','be','because','been','before','being','below','between','both',
+                              'but','by','c','can','cannot','could','d','did','do','does','doesn','doing','don',
+                              'down','during','e','each','f','few','for','from','further','h','had','hadn','has',
+                              'hasn','have','haven','having','he','her','here','hers','herself','him','himself',
+                              'his','how','i','if','in','into','is','isn','it','its','itself','l','ll','let',
+                              'm','me','more','most','must','mustn','my','myself','n','no','nor','not','o','of,'
+                              'off','on','once','only','or','other','ought','our','ours','ourselves','out','over',
+                              'own','s','same','she','should','shouldn','so','some','such','t','than','that','the',
+                              'their','theirs','them','themselves','then','there','these','they','this','those',
+                              'through','to','too','u','under','until','up','v','ve','very','w','was','wasn','we',
+                              'were','weren','what','when','where','which','while','who','whom','why','with','won',
+                              'would','wouldn','you','your','yours','yourself','yourselves'})
                 for sw in stop_words:
                     if sw in self.words:
                         self.words.pop(sw)
