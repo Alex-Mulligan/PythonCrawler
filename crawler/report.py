@@ -53,7 +53,7 @@ class Report(object):
                         word_count += 1
                         file.write(f"\t#{word_count} {word} with {occurrences} occurrences\n")
                 file.write(f"4. There were {len(self.ics_domain)} subdomains in the ics.uci.edu domain.\n"
-                           + "List of subdomains with their respective amounts of pages:")
+                           + "List of subdomains with their respective amounts of pages:\n")
                 sub_counter = 0
                 for sub, pages in sorted(self.ics_domain.items(), key = lambda x: x[0]):
                     sub_counter += 1
