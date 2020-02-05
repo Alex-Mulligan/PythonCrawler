@@ -57,6 +57,6 @@ class Report(object):
                 sub_counter = 0
                 for sub, pages in sorted(self.ics_domain.items(), key = lambda x: x[0]):
                     sub_counter += 1
-                    file.write(f"\t#{sub_counter} {sub}, {pages}")
+                    file.write(f"\t#{sub_counter} {sub}, {pages}\n")
                 
                 
