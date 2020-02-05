@@ -10,7 +10,7 @@ def scraper(url, resp):
         print(f"{url} gave status {resp.status}")
         return (list(), list())
     elif resp.status in range(600,607):
-        with open("600errors.txt", "w+") as file:
+        with open("600errors.txt", "a") as file:
             file.write(f"{url} gave status {resp.status} with message:\n{resp.error}\n")
         print(f"{url} gave status {resp.status} with message: {resp.error}")
         return (list(),list())
@@ -47,6 +47,8 @@ def is_valid(url):
     try:
         parsed = urlparse(url)
         if parsed.scheme not in set(["http", "https"]):
+            return False
+        if len(url) > 200:
             return False
         if not check_robots_txt(parsed):
             return False
