@@ -38,7 +38,7 @@ def extract_text(soup):
     tokens = []
     regex = re.compile(r"[A-Za-z0-9]+")
     for line in page_list:
-        tokens.extend(re.findall(line.lower()))
+        tokens.extend(regex.findall(line.lower()))
     return tokens #or page_text for a large string representation of the page
 
 def is_valid(url):
