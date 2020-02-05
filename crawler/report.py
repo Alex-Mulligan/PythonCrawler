@@ -20,8 +20,8 @@ class Report(object):
             for word in tokens:
                 self.words[word] += 1
             parsed = urlparse(url)
-            if match(r"ics\.uci\.edu$", parsed.netloc):
-                if not match(r"^(www\.)?ics\.uci\.edu$", parsed.netloc):
+            if re.match(r"ics\.uci\.edu$", parsed.netloc):
+                if not re.match(r"^(www\.)?ics\.uci\.edu$", parsed.netloc):
                     key = parsed.scheme + "://" + parsed.netloc
                     self.ics_domain[key] += 1
 
