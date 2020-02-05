@@ -9,7 +9,7 @@ class Report(object):
         self.ics_domain = defaultdict(int) #should be in the form {URL:number}
         self.longest_page = ('', 0)
         self.words = defaultdict(int)
-        self.lock = threading.RLock()
+        self.lock = RLock()
         
     def update_report(self, url, tokens):
         with self.lock:
