@@ -10,40 +10,54 @@ class Report(object):
         self.longest_page = ('', 0)
         self.words = defaultdict(int)
         self.lock = RLock()
-        
-    def update_report(self, url, tokens):
+    
+    def store_report(self, url, page):
         with self.lock:
-            self.unique_pages += 1
-            page_length = len(tokens)
-            if page_length > self.longest_page[1]:
-                self.longest_page = (url, page_length)
-            for word in tokens:
-                self.words[word] += 1
-            parsed = urlparse(url)
-            if re.match(r".*\.ics\.uci\.edu$", parsed.netloc):
-                if not re.match(r"^(www\.)?ics\.uci\.edu$", parsed.netloc):
-                    key = parsed.scheme + "://" + parsed.netloc
-                    self.ics_domain[key] += 1
+            with open('pages.txt', 'a+', encoding='utf-8') as file:
+                file.write(url+'|--->|'+ " ".join(page.split())+'\n')
+        
+    def update_report(self):#, url, tokens):
+        with self.lock:
+            with open('pages.txt','r', encoding='utf-8') as file:#
+                for line in file:#
+                    info = line.split('|--->|')#
+                    self.unique_pages += 1
+                    regex = re.compile(r"[A-Za-z0-9]+")#
+                    tokens = []#
+                    url = info[0]#
+                    tokens.extend(regex.findall(info[1].lower()))#
+                    page_length = len(tokens)
+                    if page_length > self.longest_page[1]:
+                        self.longest_page = (url, page_length)
+                    for word in tokens:
+                        self.words[word] += 1
+                    parsed = urlparse(url)
+                    if re.match(r".*\.ics\.uci\.edu$", parsed.netloc):
+                        if not re.match(r"^(www\.)?ics\.uci\.edu$", parsed.netloc):
+                            key = parsed.scheme + "://" + parsed.netloc
+                            self.ics_domain[key] += 1
 
     def print_report(self):
         with self.lock:
-            with open("report.txt", "w+") as file:
+            self.update_report()
+            with open("report.txt", "w+", encoding='utf-8') as file:
                 file.write(f"1. Number of unique pages found: {self.unique_pages}.\n")
                 file.write(f"2. The longest page was: {self.longest_page[0]}, with {self.longest_page[1]} words.\n")
                 file.write(f"3. The 50 most common words (excluding stop words) were:\n")
                 stop_words = set({'a','about','above','after','again','against','all','am','an','and','any','are',
                               'as','at','b','be','because','been','before','being','below','between','both',
                               'but','by','c','can','cannot','could','d','did','do','does','doesn','doing','don',
-                              'down','during','e','each','f','few','for','from','further','h','had','hadn','has',
+                              'down','during','e','each','f','few','for','from','further','g','h','had','hadn','has',
                               'hasn','have','haven','having','he','her','here','hers','herself','him','himself',
-                              'his','how','i','if','in','into','is','isn','it','its','itself','l','ll','let',
+                              'his','how','i','if','in','into','is','isn','it','its','itself','j','k','l','ll','let',
                               'm','me','more','most','must','mustn','my','myself','n','no','nor','not','o','of',
                               'off','on','once','only','or','other','ought','our','ours','ourselves','out','over',
-                              'own','s','same','she','should','shouldn','so','some','such','t','than','that','the',
-                              'their','theirs','them','themselves','then','there','these','they','this','those',
+                              'own','p','q','r','s','same','she','should','shouldn','so','some','such','t','than','that',
+                              'the','their','theirs','them','themselves','then','there','these','they','this','those',
                               'through','to','too','u','under','until','up','v','ve','very','w','was','wasn','we',
                               'were','weren','what','when','where','which','while','who','whom','why','with','won',
-                              'would','wouldn','you','your','yours','yourself','yourselves'})
+                              'would','wouldn','x','y','you','your','yours','yourself','yourselves','z','0','1','2',
+                              '3','4','5','6','7','8','9'})
                 for sw in stop_words:
                     if sw in self.words:
                         self.words.pop(sw)

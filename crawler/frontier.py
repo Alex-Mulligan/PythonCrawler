@@ -3,7 +3,8 @@ import shelve
 
 from threading import Thread, RLock
 from queue import Queue, Empty
-
+import heapq, simhash, difflib
+from urllib.parse import urlparse
 from utils import get_logger, get_urlhash, normalize
 from scraper import is_valid
 
@@ -13,6 +14,9 @@ class Frontier(object):
         self.config = config
         self.to_be_downloaded = list()
         self.lock = RLock()
+        self.simhashIndex = simhash.SimhashIndex({})
+        self.pastLinks = list()
+        self.domainHeap = []
         
         if not os.path.exists(self.config.save_file) and not restart:
             # Save file does not exist, but request to load save.
@@ -48,10 +52,25 @@ class Frontier(object):
             f"Found {tbd_count} urls to be downloaded from {total_count} "
             f"total urls discovered.")
 
-    def get_tbd_url(self):
+    def get_tbd_url(self): #used to just be return self.to_be_downloaded.pop() with the try/except blocks
         with self.lock: #added this line
             try:
-                return self.to_be_downloaded.pop()
+                tbd_url = self.to_be_downloaded.pop()
+                
+#                 if len(self.pastLinks) > 0:
+#                     r = 0.0
+#                     d = difflib.SequenceMatcher(None)
+#                     parse1 = urlparse(tbd_url)
+#                     for u in self.pastLinks :
+#                         parse2 = urlparse(u)
+#                         if(parse1.netloc == parse2.netloc):
+#                             d.set_seqs(tbd_url, u)
+#                             r = max(r,d.ratio())
+#                     if r > .95:
+#                         print('too close:', tbd_url)
+#                         tbd_url = self.get_tbd_url()
+                            
+                return tbd_url
             except IndexError:
                 return None
 
@@ -66,6 +85,11 @@ class Frontier(object):
     
     def mark_url_complete(self, url):
         with self.lock: #added this line
+            
+            if len(self.pastLinks) > 100:
+                self.pastLinks.pop(0)
+            self.pastLinks.append(url)
+            
             urlhash = get_urlhash(url)
             if urlhash not in self.save:
                 # This should not happen.
@@ -74,3 +98,10 @@ class Frontier(object):
     
             self.save[urlhash] = (url, True)
             self.save.sync()
+
+    def add_simhash(self, url, page):
+        with self.lock:
+            s = simhash.Simhash(page)
+            self.simhashIndex.add(url, s)
+        
+        

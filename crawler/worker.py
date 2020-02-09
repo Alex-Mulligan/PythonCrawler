@@ -3,7 +3,7 @@ from threading import Thread
 from utils.download import download
 from utils import get_logger
 from scraper import scraper
-import time
+import time, simhash
 
 
 class Worker(Thread):
@@ -27,9 +27,11 @@ class Worker(Thread):
                 f"using cache {self.config.cache_server}.")
             #scraped_urls = scraper(tbd_url, resp)
             scraped_urls, tokens = scraper(tbd_url, resp)
-            self.report.update_report(tbd_url, tokens)
-            #
-            for scraped_url in scraped_urls:
-                self.frontier.add_url(scraped_url)
+#             self.report.update_report(tbd_url, tokens)
+            if not tokens == '' and not self.frontier.simhashIndex.get_near_dups(simhash.Simhash(tokens)):
+                self.report.store_report(tbd_url, tokens)
+                self.frontier.add_simhash(tbd_url, tokens)
+                for scraped_url in scraped_urls:
+                    self.frontier.add_url(scraped_url)
             self.frontier.mark_url_complete(tbd_url)
             time.sleep(self.config.time_delay)
