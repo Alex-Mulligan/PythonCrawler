@@ -1,6 +1,7 @@
 import re, requests
 from urllib.parse import urlparse, urldefrag, urljoin
 from bs4 import BeautifulSoup
+from _ast import Or
 
 def scraper(url, resp):
     if resp.status in range(200,300):
@@ -45,6 +46,8 @@ def is_valid(url):
         if not check_robots_txt(parsed):
             return False
         if not other_link_checking(parsed):
+            return False
+        if bad_link(url):
             return False
         if re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
@@ -123,7 +126,7 @@ def check_robots_txt(parsed):
         raise
     
 def other_link_checking(parsed):
-    if re.match(r".*/(pdf|e?pub)/", parsed.path.lower()): #maybe add e?pub to the re
+    if re.match(r".*/(pdf|e?pub)/", parsed.path.lower()):
         return False
     if re.match(r".*/.*-(jpe?g|png)", parsed.path.lower()):
         return False
@@ -132,5 +135,16 @@ def other_link_checking(parsed):
     if re.match(r"^(replytocom=|share=|action=(login|edit)|ical=).*", parsed.query.lower()):
         return False
     return True
+    
+def bad_link(url):
+    parsed = urlparse(url)
+    if re.match(r"^http://www.ics.uci.edu/software/?$", url.lower()) or re.match(
+    r"(piki|awareness|alumni|soc|satware|cgvw|yarra|emj-pc|pasteur|omni|mapgrid|dataprotector"+
+    r"|dataguard|metaviz).ics.uci.edu", parsed.netloc):
+        return True
+    
+    
+    
+    
     
     
