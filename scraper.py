@@ -1,5 +1,5 @@
 import re, requests
-from urllib.parse import urlparse, urldefrag
+from urllib.parse import urlparse, urldefrag, urljoin
 from bs4 import BeautifulSoup
 
 def scraper(url, resp):
@@ -18,31 +18,22 @@ def scraper(url, resp):
         return (list(), "")
 
 def extract_next_links(url, resp):
-    # Implementation requred...
-#     page = requests.get(url)
-#     soup = BeautifulSoup(page.content)
     soup = BeautifulSoup(resp.raw_response.content, features="lxml")
-    links = []
-    for link in soup.findAll('a', attrs={'href':re.compile(r"^https?://")}):
-        links.append(urldefrag(link.get('href'))[0])
+#     links = []
+#     for link in soup.findAll('a', attrs={'href':re.compile(r"^https?://")}):
+#         links.append(urldefrag(link.get('href'))[0])
+    links = [urldefrag(urljoin(url, tag['href']))[0] for tag in soup.findAll('a', href=True)]
     tokens = extract_text(soup)
     return (links, tokens)
 
 def extract_text(soup):
     blacklist = ['[document]','noscript','header','html','meta','head','input','script', 'footer', 'div', 'style', 'i']
     page_text = ''
-#     page_list = []
     text = soup.findAll(text=True)
     for t in text:
         if t.parent.name not in blacklist:
             page_text += "{}".format(t) #creates a long string representing the page
-#             page_list.append(t) #adds each 'line' to a list
-    tokens = []
-    regex = re.compile(r"[A-Za-z0-9]+")
-#     for line in page_list:
-#         tokens.extend(regex.findall(line.lower()))
-    
-    return page_text #or page_text for a large string representation of the page
+    return page_text
 
 def is_valid(url):
     try:
