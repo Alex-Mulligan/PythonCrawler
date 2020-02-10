@@ -138,6 +138,8 @@ def other_link_checking(parsed):
         return False
     if re.match(r".*download/download\.inc\.php\?pid=[\d]+", parsed.path.lower() + '?' + parsed.query.lower()):
         return False
+    if re.match(r".*/img_.*", parsed.path.lower()):
+        return False
     return True
     #idx=
     #/zip-attachment/
