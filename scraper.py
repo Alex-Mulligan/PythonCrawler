@@ -59,7 +59,7 @@ def is_valid(url):
             + r"|thmx|mso|arff|rtf|jar|csv"
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz"
             + r"|ppsx|ps|z|mat|m|odc|mpg|ipynb|sql|war"
-            + r"|cls|fig|apk|img|h5|bam)$", parsed.query.lower()):
+            + r"|cls|fig|apk|img|h5|bam|r|pps)$", parsed.query.lower()):
             return False
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
@@ -71,7 +71,7 @@ def is_valid(url):
             + r"|thmx|mso|arff|rtf|jar|csv"
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz"
             + r"|ppsx|ps|z|mat|m|odc|mpg|ipynb|sql|war"
-            + r"|cls|fig|apk|img|h5|bam)$", parsed.path.lower())
+            + r"|cls|fig|apk|img|h5|bam|r|pps)$", parsed.path.lower())
 
     except TypeError:
         print ("TypeError for ", parsed)
