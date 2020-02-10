@@ -59,7 +59,7 @@ def is_valid(url):
             + r"|thmx|mso|arff|rtf|jar|csv"
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz"
             + r"|ppsx|ps|z|mat|m|odc|mpg|ipynb|sql|war"
-            + r"|cls|fig|apk|img|h5|bam|r|pps|pd|py)$", parsed.query.lower()):
+            + r"|cls|fig|apk|img|h5|bam|r|pps|pd|py|ff)$", parsed.query.lower()):
             return False
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
@@ -71,7 +71,7 @@ def is_valid(url):
             + r"|thmx|mso|arff|rtf|jar|csv"
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz"
             + r"|ppsx|ps|z|mat|m|odc|mpg|ipynb|sql|war"
-            + r"|cls|fig|apk|img|h5|bam|r|pps|pd|py)$", parsed.path.lower())
+            + r"|cls|fig|apk|img|h5|bam|r|pps|pd|py|ff)$", parsed.path.lower())
 
     except TypeError:
         print ("TypeError for ", parsed)
@@ -128,7 +128,7 @@ def check_robots_txt(parsed):
         raise
     
 def other_link_checking(parsed):
-    if re.match(r".*/(pdf|e?pub|img|zip-attachment|png)/", parsed.path.lower()):
+    if re.match(r".*/(pdf|e?pub|img|zip-attachment|png|pix)/", parsed.path.lower()):
         return False
     if re.match(r".*/.*-(jpe?g|png|img)", parsed.path.lower()):
         return False
@@ -142,7 +142,7 @@ def other_link_checking(parsed):
         return False
     return True
     #idx=
-    #/zip-attachment/
+    #
 def bad_link(url):
     parsed = urlparse(url)
     if re.match(r"^http://www.ics.uci.edu/software/?$", url.lower()) or re.match(
