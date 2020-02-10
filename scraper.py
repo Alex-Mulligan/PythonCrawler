@@ -59,7 +59,7 @@ def is_valid(url):
             + r"|thmx|mso|arff|rtf|jar|csv"
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz"
             + r"|ppsx|ps|z|mat|m|odc|mpg|ipynb|sql|war"
-            + r"|cls|fig|apk|img|h5|bam|r|pps)$", parsed.query.lower()):
+            + r"|cls|fig|apk|img|h5|bam|r|pps|pd|py)$", parsed.query.lower()):
             return False
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
@@ -71,7 +71,7 @@ def is_valid(url):
             + r"|thmx|mso|arff|rtf|jar|csv"
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz"
             + r"|ppsx|ps|z|mat|m|odc|mpg|ipynb|sql|war"
-            + r"|cls|fig|apk|img|h5|bam|r|pps)$", parsed.path.lower())
+            + r"|cls|fig|apk|img|h5|bam|r|pps|pd|py)$", parsed.path.lower())
 
     except TypeError:
         print ("TypeError for ", parsed)
@@ -128,19 +128,19 @@ def check_robots_txt(parsed):
         raise
     
 def other_link_checking(parsed):
-    if re.match(r".*/(pdf|e?pub)/", parsed.path.lower()):
+    if re.match(r".*/(pdf|e?pub|img|zip-attachment|png)/", parsed.path.lower()):
         return False
-    if re.match(r".*/.*-(jpe?g|png)", parsed.path.lower()):
+    if re.match(r".*/.*-(jpe?g|png|img)", parsed.path.lower()):
         return False
-    if re.match(r".*-(jpe?g|png)", parsed.query.lower()):
+    if re.match(r".*-(jpe?g|png|img)", parsed.query.lower()):
         return False
-    if re.match(r"^(replytocom=|share=|action=(login|edit|diff?)|ical=|from=.*&precision=|do=|format=|version=).*", parsed.query.lower()):
+    if re.match(r"^(replytocom=|share=|action=(login|edit|diff?|history)|ical=|from=.*&precision=|do=|format=|version=).*", parsed.query.lower()):
         return False
     if re.match(r".*download/download\.inc\.php\?pid=[\d]+", parsed.path.lower() + '?' + parsed.query.lower()):
         return False
     return True
     #idx=
-
+    #/zip-attachment/
 def bad_link(url):
     parsed = urlparse(url)
     if re.match(r"^http://www.ics.uci.edu/software/?$", url.lower()) or re.match(
