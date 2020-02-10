@@ -58,7 +58,8 @@ def is_valid(url):
             + r"|epub|dll|cnf|tgz|sha1"
             + r"|thmx|mso|arff|rtf|jar|csv"
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz"
-            + r"|ppsx|ps|z|mat|m|odc)$", parsed.query.lower()):
+            + r"|ppsx|ps|z|mat|m|odc|mpg|ipynb|sql|war"
+            + r"|cls|fig|apk|img|h5|bam)$", parsed.query.lower()):
             return False
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
@@ -69,7 +70,8 @@ def is_valid(url):
             + r"|epub|dll|cnf|tgz|sha1"
             + r"|thmx|mso|arff|rtf|jar|csv"
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz"
-            + r"|ppsx|ps|z|mat|m|odc)$", parsed.path.lower())
+            + r"|ppsx|ps|z|mat|m|odc|mpg|ipynb|sql|war"
+            + r"|cls|fig|apk|img|h5|bam)$", parsed.path.lower())
 
     except TypeError:
         print ("TypeError for ", parsed)
@@ -77,46 +79,46 @@ def is_valid(url):
 
 def check_robots_txt(parsed):
     try:
-        if re.match(r"ics\.uci\.edu", parsed.netloc) or re.match(r".*\.ics.uci.edu",parsed.netloc):
-            if re.match(r"^/bin/?", parsed.path) or re.match(r"^/~mpufal/?", parsed.path):
+        if re.match(r"ics\.uci\.edu", parsed.netloc.lower()) or re.match(r".*\.ics.uci.edu",parsed.netloc.lower()):
+            if re.match(r"^/bin/?", parsed.path.lower()) or re.match(r"^/~mpufal/?", parsed.path.lower()):
                 return False
             return True
-        elif re.match(r"cs\.uci\.edu", parsed.netloc) or  re.match(r".*\.cs\.uci\.edu", parsed.netloc):
-            if re.match(r"/wp-admin/?", parsed.path):
-                if not re.match(r"/wp-admin/admin-ajax.php", parsed.path):
+        elif re.match(r"cs\.uci\.edu", parsed.netloc.lower()) or  re.match(r".*\.cs\.uci\.edu", parsed.netloc.lower()):
+            if re.match(r"/wp-admin/?", parsed.path.lower()):
+                if not re.match(r"/wp-admin/admin-ajax.php", parsed.path.lower()):
                     return False
             return True
-        elif re.match(r"stat\.uci\.edu", parsed.netloc) or re.match(r".*\.stat\.uci\.edu", parsed.netloc):
-            if re.match(r"/wp-admin/?", parsed.path):
+        elif re.match(r"stat\.uci\.edu", parsed.netloc.lower()) or re.match(r".*\.stat\.uci\.edu", parsed.netloc.lower()):
+            if re.match(r"/wp-admin/?", parsed.path.lower()):
                 if not re.match(r"/wp-admin/admin-ajax.php"):
                     return False
             return True
-        elif re.match(r"informatics\.uci\.edu", parsed.netloc) or re.match(r".*\.informatics\.uci\.edu", parsed.netloc):
-            if re.match(r"/wp-admin/?", parsed.path):
-                if not re.match(r"/wp-admin/admin-ajax.php", parsed.path):
+        elif re.match(r"informatics\.uci\.edu", parsed.netloc.lower()) or re.match(r".*\.informatics\.uci\.edu", parsed.netloc.lower()):
+            if re.match(r"/wp-admin/?", parsed.path.lower()):
+                if not re.match(r"/wp-admin/admin-ajax.php", parsed.path.lower()):
                     return False
-            elif re.match(r"/research/?", parsed.path):
-                if not (re.match(r"/research/lab-centers/?", parsed.path) or 
-                        re.match(r"/research/areas-of-expertise/?", parsed.path) or 
-                        re.match(r"/research/example-research-projects/?", parsed.path) or 
-                        re.match(r"/research/phd-research/?", parsed.path) or 
-                        re.match(r"/research/past-dissertations/?", parsed.path) or 
-                        re.match(r"/research/masters-research/?", parsed.path) or 
-                        re.match(r"/research/undergraduate-research/?", parsed.path) or 
-                        re.match(r"/research/gifts-grants/?", parsed.path)):
+            elif re.match(r"/research/?", parsed.path.lower()):
+                if not (re.match(r"/research/lab-centers/?", parsed.path.lower()) or 
+                        re.match(r"/research/areas-of-expertise/?", parsed.path.lower()) or 
+                        re.match(r"/research/example-research-projects/?", parsed.path.lower()) or 
+                        re.match(r"/research/phd-research/?", parsed.path.lower()) or 
+                        re.match(r"/research/past-dissertations/?", parsed.path.lower()) or 
+                        re.match(r"/research/masters-research/?", parsed.path.lower()) or 
+                        re.match(r"/research/undergraduate-research/?", parsed.path.lower()) or 
+                        re.match(r"/research/gifts-grants/?", parsed.path.lower())):
                     return False
             return True
-        elif re.match(r"^(www\.)?today\.uci\.edu", parsed.netloc) and re.match(r"^department/information_computer_sciences/.*", parsed.path):
-            if re.match(r".*/calendar/.*\?.*types.*", parsed.path+'?'+parsed.query):
+        elif re.match(r"^(www\.)?today\.uci\.edu", parsed.netloc.lower()) and re.match(r"^/department/information_computer_sciences.*", parsed.path.lower()):
+            if re.match(r".*/calendar.*\?.*types.*", parsed.path.lower()+'?'+parsed.query.lower()):
                 return False
-            elif re.match(r".*/browse.*\?.*types.*", parsed.path+'?'+parsed.query):
+            elif re.match(r".*/browse.*\?.*types.*", parsed.path.lower()+'?'+parsed.query.lower()):
                 return False
-            elif re.match(r".*/calendar/week/?", parsed.path):
+            elif re.match(r".*/calendar/(week|day)/?", parsed.path.lower()):
                 return False
-            elif re.match(r".*/calendar/20[0-2]\d.*", parsed.path):
+            elif re.match(r".*/calendar/20[0-2]\d.*", parsed.path.lower()):
                 return False
             elif re.match(r".*/search/?", parsed.path):
-                if not re.match(r".*/search/events\.(ics|xml)/?", parsed.path):
+                if not re.match(r".*/search/events\.(ics|xml)/?", parsed.path.lower()):
                     return False
             return True
         else:
@@ -132,15 +134,18 @@ def other_link_checking(parsed):
         return False
     if re.match(r".*-(jpe?g|png)", parsed.query.lower()):
         return False
-    if re.match(r"^(replytocom=|share=|action=(login|edit)|ical=).*", parsed.query.lower()):
+    if re.match(r"^(replytocom=|share=|action=(login|edit|diff?)|ical=|from=.*&precision=|do=|format=|version=).*", parsed.query.lower()):
+        return False
+    if re.match(r".*download/download\.inc\.php\?pid=[\d]+", parsed.path.lower() + '?' + parsed.query.lower()):
         return False
     return True
-    
+    #idx=
+
 def bad_link(url):
     parsed = urlparse(url)
     if re.match(r"^http://www.ics.uci.edu/software/?$", url.lower()) or re.match(
     r"(piki|awareness|alumni|soc|satware|cgvw|yarra|emj-pc|pasteur|omni|mapgrid|dataprotector"+
-    r"|dataguard|metaviz).ics.uci.edu", parsed.netloc):
+    r"|dataguard|metaviz).ics.uci.edu", parsed.netloc.lower()):
         return True
     
     

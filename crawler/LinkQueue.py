@@ -12,12 +12,17 @@ class LinkQueue(object):
         with self.lock:
             self.links.put_nowait(url)
         
-    def getLink(self, url):
+    def getLink(self):
         with self.lock:
-            if time.time() - self.lastAccess >= .500:
-                self.lastAccess = time.time()
-                return self.links.get_nowait()
-            else:
-                time.sleep(abs(time.time() - self.lastAccess))
-                self.lastAccess = time.time()
-                return self.links.get_nowait()
+            try:
+                if time.time() - self.lastAccess >= .500:
+                    self.lastAccess = time.time()
+                    return self.links.get_nowait()
+                else:
+                    time.sleep(abs(time.time() - self.lastAccess))
+                    self.lastAccess = time.time()
+                    return self.links.get_nowait()
+            except Empty:
+                return None
+    def qsize(self):
+        return self.links.qsize()
