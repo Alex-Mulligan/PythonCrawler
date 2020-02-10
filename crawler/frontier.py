@@ -103,8 +103,8 @@ class Frontier(object):
                     else:
                         heapq.heappush(self.timingHeap, (time.time(), 'today'))
                         tbd_url = self.tbd5.getLink()
-                    if not tbd_url:
-                        tbd_url = self.get_tbd_url()
+#                     if not tbd_url:
+#                         tbd_url = self.get_tbd_url()
                 except IndexError:
                     tbd_url = None
                 ###end multithreading attempt###
