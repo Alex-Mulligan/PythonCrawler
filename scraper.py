@@ -1,7 +1,6 @@
 import re, requests
 from urllib.parse import urlparse, urldefrag, urljoin
 from bs4 import BeautifulSoup
-from _ast import Or
 
 def scraper(url, resp):
     if resp.status in range(200,300):
@@ -20,9 +19,6 @@ def scraper(url, resp):
 
 def extract_next_links(url, resp):
     soup = BeautifulSoup(resp.raw_response.content, features="lxml")
-#     links = []
-#     for link in soup.findAll('a', attrs={'href':re.compile(r"^https?://")}):
-#         links.append(urldefrag(link.get('href'))[0])
     links = [urldefrag(urljoin(url, tag['href']))[0] for tag in soup.findAll('a', href=True)]
     tokens = extract_text(soup)
     return (links, tokens)
@@ -41,9 +37,9 @@ def is_valid(url):
         parsed = urlparse(url)
         if parsed.scheme not in set(["http", "https"]):
             return False
-        if len(url) > 250:
+        if len(url) > 300:
             return False
-        if not check_robots_txt(parsed):
+        if not manual_robots_txt(parsed):
             return False
         if not other_link_checking(parsed):
             return False
@@ -59,7 +55,8 @@ def is_valid(url):
             + r"|thmx|mso|arff|rtf|jar|csv"
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz"
             + r"|ppsx|ps|z|mat|m|odc|mpg|ipynb|sql|war"
-            + r"|cls|fig|apk|img|h5|bam|r|pps|pd|py|ff)$", parsed.query.lower()):
+            + r"|cls|fig|apk|img|h5|bam|r|pps|pd|py|ff"
+            + r"|tra|tes|java|c|h|fpkm|psp|bib)$", parsed.query.lower()):
             return False
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
@@ -71,13 +68,14 @@ def is_valid(url):
             + r"|thmx|mso|arff|rtf|jar|csv"
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz"
             + r"|ppsx|ps|z|mat|m|odc|mpg|ipynb|sql|war"
-            + r"|cls|fig|apk|img|h5|bam|r|pps|pd|py|ff)$", parsed.path.lower())
-
+            + r"|cls|fig|apk|img|h5|bam|r|pps|pd|py|ff"
+            + r"|tra|tes|java|c|h|fpkm|psp|bib)$", parsed.path.lower())
+        #
     except TypeError:
         print ("TypeError for ", parsed)
         raise
 
-def check_robots_txt(parsed):
+def manual_robots_txt(parsed):
     try:
         if re.match(r"ics\.uci\.edu", parsed.netloc.lower()) or re.match(r".*\.ics.uci.edu",parsed.netloc.lower()):
             if re.match(r"^/bin/?", parsed.path.lower()) or re.match(r"^/~mpufal/?", parsed.path.lower()):
@@ -146,10 +144,16 @@ def other_link_checking(parsed):
 def bad_link(url):
     parsed = urlparse(url)
     if re.match(r"^http://www.ics.uci.edu/software/?$", url.lower()) or re.match(
-    r"(piki|awareness|alumni|soc|satware|cgvw|yarra|emj-pc|pasteur|omni|mapgrid|dataprotector"+
-    r"|dataguard|metaviz).ics.uci.edu", parsed.netloc.lower()):
+    r"(www\.)?(piki|awareness|alumni|soc|satware|cgvw|yarra|emj-pc|pasteur|omni|mapgrid|dataprotector"
+    + r"|dataguard|metaviz|asterixdb|vid|cocoa-krispies|cherry|timesheet|fano|www-db|map125|lolth"
+    + r"|auge|chime|jujube|codeexchange|reactions|old-reactions|contact|dblp|givargis|seraja).ics.uci.edu", parsed.netloc.lower()):
         return True
-    
+    if re.match(r"(http://flamingo.ics.uci.edu/localsearch/fuzzysearch|http://asterix.ics.uci.edu/fuzzyjoin-mapreduce"
+                + r"|http://cdb.ics.uci.edu/cgibin/tools/RNN_tool_kits.htm|http://www.ics.uci.edu/software/CCT"
+                + r"|http://www.isg.ics.uci.edu|http://cs.uci.edu|http://http:www.ics.uci.edu/~jacobson/ics21/LabManual/00-LabManual.html"
+                + r"|http://www.ics.uci.edu/community/alumni/mentor/mentor_list.php|http://www-db.ics.uci.edu:\d+)", url):
+        return True
+    return False
     
     
     
