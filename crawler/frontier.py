@@ -8,21 +8,24 @@ from urllib.parse import urlparse
 from utils import get_logger, get_urlhash, normalize
 from scraper import is_valid
 from crawler.LinkQueue import LinkQueue
+from urllib.robotparser import RobotFileParser
 
 class Frontier(object):
-    def __init__(self, config, restart):
+    def __init__(self, config, restart, threads):
         self.logger = get_logger("FRONTIER")
         self.config = config
         self.to_be_downloaded = list()
         self.lock = RLock()
         self.simhashIndex = simhash.SimhashIndex({})
-        self.pastLinks = list()
+#         self.pastLinks = list()
         self.timingHeap = []
         self.tbd1 = LinkQueue() #ics
         self.tbd2 = LinkQueue() #cs
         self.tbd3 = LinkQueue() #stat
         self.tbd4 = LinkQueue() #informatics
         self.tbd5 = LinkQueue() #today
+        self.threadCount = threads
+        self.robots = dict()
         
         if not os.path.exists(self.config.save_file) and not restart:
             # Save file does not exist, but request to load save.
@@ -103,8 +106,9 @@ class Frontier(object):
                     else:
                         heapq.heappush(self.timingHeap, (time.time(), 'today'))
                         tbd_url = self.tbd5.getLink()
-#                     if not tbd_url:
-#                         tbd_url = self.get_tbd_url()
+                    if not tbd_url:
+                        if self.backQueueStatus():
+                            tbd_url = self.get_tbd_url()
                 except IndexError:
                     tbd_url = None
                 ###end multithreading attempt###
@@ -146,18 +150,45 @@ class Frontier(object):
             self.simhashIndex.add(url, s)
         
     def add_to_backQueue(self, url):
-        parsed = urlparse(url)
-        if re.match(r"ics\.uci\.edu", parsed.netloc.lower()) or re.match(r".*\.ics.uci.edu",parsed.netloc.lower()):
-            self.tbd1.addLink(url)
-        elif re.match(r"cs\.uci\.edu", parsed.netloc.lower()) or  re.match(r".*\.cs\.uci\.edu", parsed.netloc.lower()):
-            self.tbd2.addLink(url)
-        elif re.match(r"stat\.uci\.edu", parsed.netloc.lower()) or re.match(r".*\.stat\.uci\.edu", parsed.netloc.lower()):
-            self.tbd3.addLink(url)
-        elif re.match(r"informatics\.uci\.edu", parsed.netloc.lower()) or re.match(r".*\.informatics\.uci\.edu", parsed.netloc.lower()):
-            self.tbd4.addLink(url)
-        elif re.match(r"^(www\.)?today\.uci\.edu", parsed.netloc.lower()) and re.match(r"^/department/information_computer_sciences.*", parsed.path.lower()):
-            self.tbd5.addLink(url)
-        else:
-            #This should not happen
-            pass
+        with self.lock:
+            parsed = urlparse(url)
+            if re.match(r"ics\.uci\.edu", parsed.netloc.lower()) or re.match(r".*\.ics.uci.edu",parsed.netloc.lower()):
+                self.tbd1.addLink(url)
+            elif re.match(r"cs\.uci\.edu", parsed.netloc.lower()) or  re.match(r".*\.cs\.uci\.edu", parsed.netloc.lower()):
+                self.tbd2.addLink(url)
+            elif re.match(r"stat\.uci\.edu", parsed.netloc.lower()) or re.match(r".*\.stat\.uci\.edu", parsed.netloc.lower()):
+                self.tbd3.addLink(url)
+            elif re.match(r"informatics\.uci\.edu", parsed.netloc.lower()) or re.match(r".*\.informatics\.uci\.edu", parsed.netloc.lower()):
+                self.tbd4.addLink(url)
+            elif re.match(r"^(www\.)?today\.uci\.edu", parsed.netloc.lower()) and re.match(r"^/department/information_computer_sciences.*", parsed.path.lower()):
+                self.tbd5.addLink(url)
+            else:
+                #This should not happen
+                pass
+    
+    def backQueueStatus(self):
+        with self.lock:
+            if self.tbd1.qsize() == 0 and self.tbd2.qsize() == 0 and self.tbd3.qsize() == 0 and self.tbd4.qsize() == 0 and self.tbd5.qsize() == 0:
+                return False
+            return True
+            
+    def end_thread(self):
+        self.threadCount -= 1
         
+    def check_robots(self, url):
+        parsed = urlparse(url)
+        if parsed.netloc in self.robots:
+            if self.robots[parsed.netloc]:
+                return self.robots[parsed.netloc].can_fetch("*", url)
+            else:
+                return True
+        else:
+            try:
+                self.robots[parsed.netloc] = RobotFileParser(parsed.scheme + "://" + parsed.netloc + "/robots.txt")
+                self.robots[parsed.netloc].read()
+                return self.robots[parsed.netloc].can_fetch("*", url)
+            except:
+                self.robots[parsed.netloc] = None
+                return True
+                
+            

@@ -15,11 +15,11 @@ class LinkQueue(object):
     def getLink(self):
         with self.lock:
             try:
-                if time.time() - self.lastAccess >= 0.500:
+                if time.time() - self.lastAccess >= 0.550:
                     self.lastAccess = time.time()
                     return self.links.get_nowait()
                 else:
-                    time.sleep(abs(0.500 - abs(time.time() - self.lastAccess))) 
+                    time.sleep(abs(0.650 - abs(time.time() - self.lastAccess))) 
                     self.lastAccess = time.time()
                     return self.links.get_nowait()
             except Empty:
