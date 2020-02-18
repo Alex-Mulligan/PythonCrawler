@@ -34,7 +34,7 @@ class Report(object):
                     parsed = urlparse(url)
                     if re.match(r".*\.ics\.uci\.edu$", parsed.netloc):
                         if not re.match(r"^(www\.)?ics\.uci\.edu$", parsed.netloc):
-                            key = parsed.scheme + "://" + parsed.netloc
+                            key = parsed.netloc #key = parsed.scheme + "://" + parsed.netloc
                             self.ics_domain[key] += 1
 
     def print_report(self):
@@ -44,20 +44,21 @@ class Report(object):
                 file.write(f"1. Number of unique pages found: {self.unique_pages}.\n")
                 file.write(f"2. The longest page was: {self.longest_page[0]}, with {self.longest_page[1]} words.\n")
                 file.write(f"3. The 50 most common words (excluding stop words) were:\n")
-                stop_words = set({'a','about','above','after','again','against','all','am','an','and','any','are',
+                stop_words = set({'a','about','above','after','again','against','all','also','am','an','and','any','are',
                               'as','at','b','be','because','been','before','being','below','between','both',
                               'but','by','c','can','cannot','could','d','did','do','does','doesn','doing','don',
-                              'down','during','e','each','f','few','for','from','further','g','h','had','hadn','has',
+                              'down','during','e','each','edu','f','few','for','from','further','g','h','had','hadn','has',
                               'hasn','have','haven','having','he','her','here','hers','herself','him','himself',
-                              'his','how','i','if','in','into','is','isn','it','its','itself','j','k','l','ll','let',
-                              'm','me','more','most','must','mustn','my','myself','n','no','nor','not','o','of',
+                              'his','how','http','i','if','in','into','is','isn','it','its','itself','j','k','l','ll','let',
+                              'm','may','me','more','most','must','mustn','my','myself','n','new','no','nor','not','o','of',
                               'off','on','once','only','or','other','ought','our','ours','ourselves','out','over',
-                              'own','p','q','r','s','same','she','should','shouldn','so','some','such','t','than','that',
+                              'own','p','q','r','s','same','set','she','should','shouldn','so','some','such','t','than','that',
                               'the','their','theirs','them','themselves','then','there','these','they','this','those',
-                              'through','to','too','u','under','until','up','v','ve','very','w','was','wasn','we',
-                              'were','weren','what','when','where','which','while','who','whom','why','with','won',
+                              'through','to','too','u','under','use','until','up','v','ve','very','w','was','wasn','we',
+                              'were','weren','what','when','where','which','while','will','who','whom','why','with','won',
                               'would','wouldn','x','y','you','your','yours','yourself','yourselves','z','0','1','2',
-                              '3','4','5','6','7','8','9'})
+                              '3','4','5','6','7','8','9','00','01','02','03','04','05','06','07','08','09','10',
+                               'one','two','three','four','five','six','seven','eight','nine','ten'})
                 for sw in stop_words:
                     if sw in self.words:
                         self.words.pop(sw)
