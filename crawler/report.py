@@ -57,8 +57,8 @@ class Report(object):
                               'through','to','too','u','under','use','until','up','us','using','v','ve','very','w','was','wasn','we',
                               'were','weren','what','when','where','which','while','will','who','whom','why','with','won',
                               'would','wouldn','x','y','you','your','yours','yourself','yourselves','z','0','1','2',
-                              '3','4','5','6','7','8','9','00','01','02','03','04','05','06','07','08','09','10',
-                               'one','two','three','four','five','six','seven','eight','nine','ten'})
+                              '3','4','5','6','7','8','9','00','01','02','03','04','05','06','07','08','09','10','11','12','13',
+                              '14','15','16','17','18','19','20','one','two','three','four','five','six','seven','eight','nine','ten'})
                 for sw in stop_words:
                     if sw in self.words:
                         self.words.pop(sw)
