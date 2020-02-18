@@ -3,7 +3,7 @@ from threading import Thread
 from utils.download import download
 from utils import get_logger
 from scraper import scraper
-import time, simhash
+import time, simhash #simhash from https://github.com/leonsim/simhash
 
 
 class Worker(Thread):
@@ -28,6 +28,7 @@ class Worker(Thread):
                 f"Downloaded {tbd_url}, status <{resp.status}>, "
                 f"using cache {self.config.cache_server}.")
             scraped_urls, tokens = scraper(tbd_url, resp)
+            #checks to make sure page is not empty and not a duplicate (using simhash)
             if not tokens == '' and not self.frontier.simhashIndex.get_near_dups(simhash.Simhash(tokens)):
                 self.report.store_report(tbd_url, tokens)
                 self.frontier.add_simhash(tbd_url, tokens)

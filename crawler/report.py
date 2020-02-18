@@ -11,21 +11,23 @@ class Report(object):
         self.words = defaultdict(int)
         self.lock = RLock()
     
+    #stores the page contents locally in a text file
     def store_report(self, url, page):
         with self.lock:
             with open('pages.txt', 'a+', encoding='utf-8') as file:
                 file.write(url+'|--->|'+ " ".join(page.split())+'\n')
-        
-    def update_report(self):#, url, tokens):
+     
+    #parses the stored pages to create the report information
+    def update_report(self):
         with self.lock:
-            with open('pages.txt','r', encoding='utf-8') as file:#
-                for line in file:#
-                    info = line.split('|--->|')#
+            with open('pages.txt','r', encoding='utf-8') as file:
+                for line in file:
+                    info = line.split('|--->|')
                     self.unique_pages += 1
-                    regex = re.compile(r"[A-Za-z0-9]+")#
-                    tokens = []#
-                    url = info[0]#
-                    tokens.extend(regex.findall(info[1].lower()))#
+                    regex = re.compile(r"[A-Za-z0-9]+")
+                    tokens = []
+                    url = info[0]
+                    tokens.extend(regex.findall(info[1].lower()))
                     page_length = len(tokens)
                     if page_length > self.longest_page[1]:
                         self.longest_page = (url, page_length)
@@ -36,7 +38,8 @@ class Report(object):
                         if not re.match(r"^(www\.)?ics\.uci\.edu$", parsed.netloc):
                             key = parsed.netloc #key = parsed.scheme + "://" + parsed.netloc
                             self.ics_domain[key] += 1
-
+    
+    #prints the report information to a text file in the correct format
     def print_report(self):
         with self.lock:
             self.update_report()

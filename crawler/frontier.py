@@ -3,7 +3,7 @@ import shelve
 import re
 from threading import Thread, RLock
 from queue import Queue, Empty
-import heapq, simhash, difflib, time
+import heapq, simhash, difflib, time #simhash from https://github.com/leonsim/simhash
 from urllib.parse import urlparse
 from utils import get_logger, get_urlhash, normalize
 from scraper import is_valid
@@ -17,7 +17,6 @@ class Frontier(object):
         self.to_be_downloaded = list()
         self.lock = RLock()
         self.simhashIndex = simhash.SimhashIndex({})
-#         self.pastLinks = list()
         self.timingHeap = []
         self.tbd1 = LinkQueue() #ics
         self.tbd2 = LinkQueue() #cs
@@ -48,6 +47,8 @@ class Frontier(object):
             if not self.save:
                 for url in self.config.seed_urls:
                     self.add_url(url)
+        #this timing heap stores each domain and the last time accessed, 
+        #allowing the threads to access the oldest domain first
         for d in ['ics','cs','stat','informatics','today']:
             heapq.heappush(self.timingHeap, (time.time(), d))
         print(self.tbd1.qsize())
@@ -70,25 +71,12 @@ class Frontier(object):
             f"total urls discovered.")
         
         
-    def get_tbd_url(self): #used to just be return self.to_be_downloaded.pop() with the try/except blocks
-        with self.lock: #added this line
+    def get_tbd_url(self): 
+        with self.lock: 
             try:
 #                 tbd_url = self.to_be_downloaded.pop()
-                
-#                 if len(self.pastLinks) > 0:
-#                     r = 0.0
-#                     d = difflib.SequenceMatcher(None)
-#                     parse1 = urlparse(tbd_url)
-#                     for u in self.pastLinks :
-#                         parse2 = urlparse(u)
-#                         if(parse1.netloc == parse2.netloc):
-#                             d.set_seqs(tbd_url, u)
-#                             r = max(r,d.ratio())
-#                     if r > .95:
-#                         print('too close:', tbd_url)
-#                         tbd_url = self.get_tbd_url()
 
-                ###This is the multithreading attempt###
+                ###This is the multithreading section###
                 try:
                     domain = heapq.heappop(self.timingHeap)
                     if domain[1] == 'ics':
@@ -111,29 +99,24 @@ class Frontier(object):
                             tbd_url = self.get_tbd_url()
                 except IndexError:
                     tbd_url = None
-                ###end multithreading attempt###
+                ###end multithreading section###
                 
                 return tbd_url
             except IndexError:
                 return None
 
     def add_url(self, url):
-        with self.lock: #added this line
+        with self.lock: 
             url = normalize(url)
             urlhash = get_urlhash(url)
             if urlhash not in self.save:
                 self.save[urlhash] = (url, False)
                 self.save.sync()
 #                 self.to_be_downloaded.append(url)
-                #
                 self.add_to_backQueue(url)
             
     def mark_url_complete(self, url):
-        with self.lock: #added this line
-            
-#             if len(self.pastLinks) > 100:
-#                 self.pastLinks.pop(0)
-#             self.pastLinks.append(url)
+        with self.lock: 
             
             urlhash = get_urlhash(url)
             if urlhash not in self.save:
@@ -143,12 +126,14 @@ class Frontier(object):
     
             self.save[urlhash] = (url, True)
             self.save.sync()
-
+    
+    #adds the simhash of the page to the dictionary for easy access to check for duplicates
     def add_simhash(self, url, page):
         with self.lock:
             s = simhash.Simhash(page)
             self.simhashIndex.add(url, s)
-        
+    
+    #adds the url to the correct queue
     def add_to_backQueue(self, url):
         with self.lock:
             parsed = urlparse(url)
@@ -166,6 +151,7 @@ class Frontier(object):
                 #This should not happen
                 pass
     
+    #checks if all queues are empty to stop the thread
     def backQueueStatus(self):
         with self.lock:
             if self.tbd1.qsize() == 0 and self.tbd2.qsize() == 0 and self.tbd3.qsize() == 0 and self.tbd4.qsize() == 0 and self.tbd5.qsize() == 0:
@@ -174,7 +160,8 @@ class Frontier(object):
             
     def end_thread(self):
         self.threadCount -= 1
-        
+    
+    #checks the robots.txt file and adds it to a dictionary so it doen't have to be accessed again
     def check_robots(self, url):
         parsed = urlparse(url)
         if parsed.netloc in self.robots:

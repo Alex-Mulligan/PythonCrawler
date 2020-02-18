@@ -2,6 +2,9 @@ from threading import Thread, RLock
 from queue import Queue, Empty
 import time
 
+#a class representing the queues used to store the urls in the frontier
+#these links store their last access time and wait to make sure the
+#crawler remains polite when accessing domains
 class LinkQueue(object):
     def __init__(self):
         self.links = Queue()
@@ -24,5 +27,7 @@ class LinkQueue(object):
                     return self.links.get_nowait()
             except Empty:
                 return None
+            
     def qsize(self):
-        return self.links.qsize()
+        with self.lock:
+            return self.links.qsize()

@@ -1,6 +1,6 @@
 import re, requests
 from urllib.parse import urlparse, urldefrag, urljoin
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup #bs4 from https://www.crummy.com/software/BeautifulSoup/
 
 def scraper(url, resp):
     if resp.status in range(200,300):
@@ -17,12 +17,14 @@ def scraper(url, resp):
     else:
         return (list(), "")
 
+#extracts links from the page content and makes relative links absolute
 def extract_next_links(url, resp):
     soup = BeautifulSoup(resp.raw_response.content, features="lxml")
     links = [urldefrag(urljoin(url, tag['href']))[0] for tag in soup.findAll('a', href=True)]
     tokens = extract_text(soup)
     return (links, tokens)
 
+#extracts text from the page 
 def extract_text(soup):
     blacklist = ['[document]','noscript','header','html','meta','head','input','script', 'footer', 'div', 'style', 'i']
     page_text = ''
@@ -70,11 +72,12 @@ def is_valid(url):
             + r"|ppsx|ps|z|mat|m|odc|mpg|ipynb|sql|war"
             + r"|cls|fig|apk|img|h5|bam|r|pps|pd|py|ff"
             + r"|tra|tes|java|c|h|fpkm|psp|bib)$", parsed.path.lower())
-        #
+        
     except TypeError:
         print ("TypeError for ", parsed)
         raise
 
+#the robotparser cannot handle certain forms of robots.txt, so this manually checks urls
 def manual_robots_txt(parsed):
     try:
         if re.match(r"ics\.uci\.edu", parsed.netloc.lower()) or re.match(r".*\.ics.uci.edu",parsed.netloc.lower()):
@@ -124,7 +127,8 @@ def manual_robots_txt(parsed):
     except:
         print(f"Error for {parsed}")
         raise
-    
+
+#avoids certain path patterns that statistically led to back files/pages
 def other_link_checking(parsed):
     if re.match(r".*/(pdf|e?pub|img|zip-attachment|png|pix)/", parsed.path.lower()):
         return False
@@ -139,8 +143,8 @@ def other_link_checking(parsed):
     if re.match(r".*/img_.*", parsed.path.lower()):
         return False
     return True
-    #idx=
-    #
+
+#avoids urls that were found to be troublesome
 def bad_link(url):
     parsed = urlparse(url)
     if re.match(r"^http://www.ics.uci.edu/software/?$", url.lower()) or re.match(
